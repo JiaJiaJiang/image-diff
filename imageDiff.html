@@ -1,0 +1,90 @@
+<title>image diff</title>
+
+<style>
+img{
+	height: auto;
+}
+</style>
+
+<p>图1</p>
+<input type="file" name="i1" accept="image/*"><br>
+<img id="i1">
+
+<p>图2</p>
+<input type="file" name="i2" accept="image/*"><br>
+<img id="i2">
+
+<p>result</p>
+<button>diff</button><br>
+<canvas id="poi"></canvas>
+
+
+
+
+
+<script>
+function $_$(s) {
+	return document.querySelector(s);
+}
+function $__$(s) {
+	return document.querySelectorAll(s);
+}
+
+var X=window.devicePixelRatio||1;
+
+var canvas=$_$('#poi'),
+	ctx=canvas.getContext('2d');
+	inputs=$__$('input');
+
+
+var imageCanvas={
+	i1:document.createElement('canvas'),
+	i2:document.createElement('canvas')
+}
+
+/*document.body.appendChild(imageCanvas.i1)
+document.body.appendChild(imageCanvas.i2)*/
+
+Array.prototype.slice.call(inputs).forEach(function(i){
+	i.addEventListener('change',function(){
+		var file=i.files[0],
+			name=i.name,
+			cv=imageCanvas[name],
+			imageObj=$_$('img#'+name);
+		imageObj.src=URL.createObjectURL(file);
+		imageObj.onload=function(){
+			cv.width=imageObj.naturalWidth;
+		cv.height=imageObj.naturalHeight;
+		console.log(imageObj.naturalWidth,imageObj.naturalHeight,cv.width,cv.height)
+		imageCanvas[name].getContext('2d').drawImage(imageObj,0,0);
+		}
+	});
+});
+
+function diff(){
+	console.log('diff')
+	var w=imageCanvas.i1.width,
+		h=imageCanvas.i1.height,
+		length=w*h;
+	canvas.style.width=((canvas.width=w)/X+'px');
+	canvas.style.height=((canvas.height=h)/X+'px');
+	var imgData1=imageCanvas.i1.getContext('2d').getImageData(0,0,w,h);
+	var imgData2=imageCanvas.i2.getContext('2d').getImageData(0,0,w,h);
+	var g=0,count=0,num,total=0;
+	while((++g)<=length){
+		total++;
+		for(var i=4;i--;){
+			num=g*4-i-1;
+			if((imgData1.data[num])!==(imgData2.data[num])){
+				var line=(g/w)|0+0.5,
+					colume=(g)%w;
+				ctx.fillRect(colume,line,1,1);
+				count++;
+				break;
+			}
+		}
+	}
+	console.log('diff:',count,'total:',total,length)
+}
+$_$('button').addEventListener('click',diff);
+</script>
