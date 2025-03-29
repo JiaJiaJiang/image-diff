@@ -1,4 +1,4 @@
-#html5-image-diff
+# html5-image-diff
 
 简易图片比较工具
 
